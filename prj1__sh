@@ -1,7 +1,5 @@
 #! /bin/bash
 echo "------------------------------"
-echo "User Name: jeonghyojeong"
-echo "Student Number: 12223018"
 echo "[Menu]"
 echo "1. Get the data of the movie identified by a specific 'movie id' from 'u.item'"
 echo "2. Get the data of action genre movies from 'u.item'"
