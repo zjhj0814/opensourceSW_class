@@ -1,0 +1,87 @@
+#! /bin/bash
+echo "------------------------------"
+echo "User Name: jeonghyojeong"
+echo "Student Number: 12223018"
+echo "[Menu]"
+echo "1. Get the data of the movie identified by a specific 'movie id' from 'u.item'"
+echo "2. Get the data of action genre movies from 'u.item'"
+echo "3. Get the average 'rating' of the movie identified by specific 'movie id' from 'u.data'"
+echo "4. Delete the 'IMDb URL' from 'u.item'"
+echo "5. Get the data about users from 'u.user'"
+echo "6. Modify the format of 'release date' in 'u.item'"
+echo "7. Get the data of movies rated by a specific 'user id' from 'u.data'
+8. Get the average 'rating' of movies rated by users with 'age' between 20 and 29 and 'occupation' as 'programmer'
+9.Exit"
+echo "------------------------------"
+
+item=$1
+data=$2
+user=$3
+
+while :
+do	
+	read -p "Enter your choice [1-9] " choice
+	case $choice in
+		1)
+			read -p "Please enter 'movie id'(1~1682):" movie_number
+			cat $item | awk -F\| -v movie_id=$movie_number '$1==movie_id {print $0}'
+			;;
+		2)
+			read -p "Do you want to get the data of 'action' genre movies from 'u.item'?(y/n):" yn
+			if [ $yn == "y" ]; then
+				cat $item | awk -F\| -v count=1 '$7==1&&count<=10 {print $1, $2; count++}'
+			fi
+			;;
+		3)	
+			read -p "Please enter the 'movie id'(1-1682):" movie_number
+			cat $data | awk -v movie_id=$movie_number 'BEGIN {sum=0; count=0} $2==movie_id {sum += $3; count++} END {printf "average rating of %d: %.5f\n", movie_id, sum/count}'
+			;;
+		4)
+			read -p "Do you want to delete the 'IMDb URL' from 'u.item'?(y/n):" yn
+			if [ $yn == "y" ]; then
+				cat $item | sed -n -e 's/http:\/\/[^|]*|/|/g; 1,10p' 
+			fi
+			;;
+		5)
+			read -p "Do you want to get the data about users from 'u.user'?(y/n):" yn
+			if [ $yn == "y" ]; then
+				cat $user | awk -F\| -v count=1 'count<=10 {printf "user %d is %d years old %s %s\n", $1, $2, ($3=="M"?"male":"female"), $4; count++}' 
+			fi
+			;;
+		6)
+			read -p "Do you want to Modify the format of 'release data' in 'u.item'?(y/n):" yn
+			if [ $yn == "y" ]; then
+				IFS="-" read -ra date <<<$(cat $item | awk -F\| -v count=1673 '$1==count&&count<=1682 {print $3}') 
+			case $date[1] in
+				"Jan") month="01" ;;
+				"Feb") month="02" ;;
+				"Mar") month="03" ;;
+				"Apr") month="04" ;;
+				"May") month="05" ;;
+				"Jun") month="06" ;;
+				"Jul") month="07" ;;
+				"Aug") month="08" ;;
+				"Sep") month="09" ;;
+				"Oct") month="10" ;;
+				"Nov") month="11" ;;
+				"Dec") month="12" ;;
+				*) month=$date[1] ;;
+			esac
+
+			new_date="${date[2]}${month}${date[0]}"
+			
+			output=$(cat $item | sed "s/${date[0]}-${date[1]}-${date[2]}/$new_date/g; 1673,1682p")
+			echo $output
+			fi
+			;;
+		7)
+			;;
+		8)
+			;;
+		9) 
+			echo "Bye!"
+			exit 0
+			;;
+
+	esac
+done
